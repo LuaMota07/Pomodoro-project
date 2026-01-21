@@ -3,7 +3,7 @@ html {
   font-size: 20px;
   min-height: 100vh;
   background-image: linear-gradient(-20deg, #025159 0%, #733b36 100%);
-  color: #d8e9ef;
+  color: #d8e0ef98;
 }
 
 .app-container {
@@ -24,7 +24,7 @@ html {
 .buttons button {
   background: none;
   border: none;
-  color: #d8e9ef;
+  color: #d8deef;
   margin: 0 8px;
   cursor: pointer;
   text-transform: uppercase;

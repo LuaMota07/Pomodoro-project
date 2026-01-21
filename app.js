@@ -1,5 +1,3 @@
-const bells = new Audio("./sounds/bell.wav");
-
 const minutesEl = document.querySelector(".minutes");
 const secondsEl = document.querySelector(".seconds");
 const messageEl = document.querySelector(".app-message");
@@ -8,83 +6,77 @@ const startBtn = document.querySelector(".btn-start");
 const pauseBtn = document.querySelector(".btn-pause");
 const resetBtn = document.querySelector(".btn-reset");
 
-// Tempos da técnica Pomodoro (em segundos)
-const WORK_TIME = 25 * 60;
-const SHORT_BREAK = 5 * 60;
-const LONG_BREAK = 15 * 60;
+const modeButtons = document.querySelectorAll(".mode");
 
-let totalSeconds = WORK_TIME;
-let interval = null;
+let timer;
+let time = 25 * 60; 
 let isRunning = false;
-let pomodoroCount = 0;
-let mode = "work"; // work | shortBreak | longBreak
 
 function updateDisplay() {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
 
-  minutesEl.textContent = minutes;
-  secondsEl.textContent = seconds < 10 ? "0" + seconds : seconds;
+  minutesEl.textContent = String(minutes).padStart(2, "0");
+  secondsEl.textContent = String(seconds).padStart(2, "0");
 }
+
 
 function startTimer() {
   if (isRunning) return;
-
   isRunning = true;
-  messageEl.textContent =
-    mode === "work" ? "focus time 🍅" : "break time ☕";
 
-  interval = setInterval(() => {
-    totalSeconds--;
-    updateDisplay();
+  messageEl.textContent = "Em andamento...";
 
-    if (totalSeconds === 0) {
-      bells.play();
-      clearInterval(interval);
+  timer = setInterval(() => {
+    if (time > 0) {
+      time--;
+      updateDisplay();
+    } else {
+      clearInterval(timer);
       isRunning = false;
-      nextPhase();
+      messageEl.textContent = "Tempo finalizado!";
     }
   }, 1000);
 }
 
+
 function pauseTimer() {
-  clearInterval(interval);
+  clearInterval(timer);
   isRunning = false;
-  messageEl.textContent = "paused";
+  messageEl.textContent = "Pausado";
 }
 
 function resetTimer() {
-  clearInterval(interval);
+  clearInterval(timer);
   isRunning = false;
-  mode = "work";
-  pomodoroCount = 0;
-  totalSeconds = WORK_TIME;
-  messageEl.textContent = "press start to begin";
+
+  const activeMode = document.querySelector(".mode.active");
+  const minutes = activeMode.dataset.time;
+
+  time = minutes * 60;
   updateDisplay();
+  messageEl.textContent = "Resetado";
 }
 
-function nextPhase() {
-  if (mode === "work") {
-    pomodoroCount++;
+modeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    modeButtons.forEach((btn) => btn.classList.remove("active"));
+    button.classList.add("active");
 
-    if (pomodoroCount % 4 === 0) {
-      mode = "longBreak";
-      totalSeconds = LONG_BREAK;
-      messageEl.textContent = "long break 🛌";
-    } else {
-      mode = "shortBreak";
-      totalSeconds = SHORT_BREAK;
-      messageEl.textContent = "short break ☕";
-    }
-  } else {
-    mode = "work";
-    totalSeconds = WORK_TIME;
-    messageEl.textContent = "back to focus 🍅";
-  }
+    clearInterval(timer);
+    isRunning = false;
 
-  updateDisplay();
-  startTimer();
-}
+    const minutes = button.dataset.time;
+    time = minutes * 60;
+    updateDisplay();
+
+    const type = button.dataset.type;
+    if (type === "focus") messageEl.textContent = "Modo Foco";
+    if (type === "short-break") messageEl.textContent = "Pausa curta";
+    if (type === "long-break") messageEl.textContent = "Pausa longa";
+  });
+});
+
 
 startBtn.addEventListener("click", startTimer);
 pauseBtn.addEventListener("click", pauseTimer);
